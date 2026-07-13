@@ -306,7 +306,7 @@ function goDt(id){ var d=Dt[id];if(!d)return; var p=D.find(function(x){return x.
 (function(){var t=document.getElementById("navToggle"),m=document.getElementById("navMenu");if(t&&m){t.onclick=function(e){e.stopPropagation();t.classList.toggle("open");m.classList.toggle("open")};var c=function(){t.classList.remove("open");m.classList.remove("open")};m.querySelectorAll("li").forEach(function(l){var o=l.onclick;l.onclick=function(e){if(o)o.call(l,e);c()}});document.addEventListener("click",function(e){if(!t.contains(e.target)&&!m.contains(e.target))c()})}})();</script>
 
 
-<!-- push OK --></body>
+</body>
 
 
 </html>
