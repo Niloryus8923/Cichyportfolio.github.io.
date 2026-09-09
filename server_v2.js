@@ -15,26 +15,43 @@ const MIME = {
   ".gif": "image/gif",
   ".svg": "image/svg+xml",
   ".ico": "image/x-icon",
-  ".webp": "image/webp"
+  ".webp": "image/webp",
+  ".avif": "image/avif"
 };
 
 http.createServer((req, res) => {
-  let filePath = req.url === "/" ? "index.html" : req.url.slice(1);
-  filePath = path.normalize(path.join(BASE, filePath));
-  if (!filePath.startsWith(BASE)) {
+  let requestPath;
+  try {
+    requestPath = decodeURIComponent(new URL(req.url, "http://localhost").pathname);
+  } catch {
+    res.writeHead(400, { "Content-Type": "text/plain; charset=utf-8" });
+    res.end("Bad Request");
+    return;
+  }
+  const relativePath = requestPath === "/" ? "index.html" : requestPath.replace(/^\/+/, "");
+  const filePath = path.resolve(BASE, relativePath);
+  const relative = path.relative(BASE, filePath);
+  if (relative.startsWith("..") || path.isAbsolute(relative)) {
     res.writeHead(403);
     res.end("Forbidden");
     return;
   }
   fs.readFile(filePath, (err, data) => {
     if (err) {
-      res.writeHead(500);
-      res.end("Error: " + err.message);
+      const status = err.code === "ENOENT" ? 404 : 500;
+      res.writeHead(status, { "Content-Type": "text/plain; charset=utf-8" });
+      res.end(status === 404 ? "Not Found" : "Internal Server Error");
       return;
     }
     const ext = path.extname(filePath).toLowerCase();
-    res.writeHead(200, { "Content-Type": MIME[ext] || "application/octet-stream" });
-    res.end(data);
+    const cacheControl = ext === ".html" ? "no-cache" : "public, max-age=604800";
+    res.writeHead(200, {
+      "Content-Type": MIME[ext] || "application/octet-stream",
+      "Cache-Control": cacheControl,
+      "X-Content-Type-Options": "nosniff",
+      "Referrer-Policy": "strict-origin-when-cross-origin"
+    });
+    res.end(req.method === "HEAD" ? undefined : data);
   });
 }).listen(PORT, "0.0.0.0", () => {
   console.log("OK:" + PORT);

@@ -1,0 +1,14 @@
+# Local browser and document-review artifacts
+.chrome-qa/
+.docx-review-0526/
+dev/
+
+# Generated page-review screenshots
+liantou-page-desktop.png
+liantou-page-full.png
+liantou-page-middle.png
+liantou-page-mobile.png
+
+# Local writing notes
+联投年货节案例文案草稿.md
+高新区案例结构与项目表述模板.md
